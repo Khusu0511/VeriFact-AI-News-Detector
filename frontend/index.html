@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriFact: AI News Analysis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Exo 2', sans-serif;
+            background-color: #0B1120;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .aurora-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at top, #1e40af 0%, transparent 50%),
+                        radial-gradient(ellipse at bottom, #be185d 0%, transparent 50%);
+            animation: aurora-flow 20s linear infinite;
+        }
+        @keyframes aurora-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .card-glass {
+            background: rgba(15, 23, 42, 0.6); /* slate-900 with opacity */
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .animated-gradient-text {
+            background: linear-gradient(90deg, #a5f3fc, #7dd3fc, #d8b4fe);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 6s ease-in-out infinite;
+        }
+        @keyframes gradient-flow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #0ea5e9, #6366f1);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 7px 30px rgba(99, 102, 241, 0.4);
+        }
+        .result-card, .history-item, .how-it-works-card {
+            animation: fadeIn 0.6s ease-out forwards;
+            opacity: 0;
+        }
+        .how-it-works-card { animation-delay: calc(var(--delay) * 150ms); }
+        .result-real { border-left: 4px solid #22c55e; }
+        .result-fake { border-left: 4px solid #ef4444; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .spinner { animation: spin 1s linear infinite; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        #history-list::-webkit-scrollbar { width: 6px; }
+        #history-list::-webkit-scrollbar-track { background: transparent; }
+        #history-list::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        #history-list::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .nav-link { position: relative; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            background-color: #38bdf8;
+            transition: all 0.3s ease-out;
+        }
+        .nav-link:hover::after {
+            width: 100%;
+            left: 0;
+        }
+        .header-anim { animation: header-fade-in 1s ease-out; }
+        @keyframes header-fade-in {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tab-btn.active {
+            background-color: #0ea5e9;
+            color: white;
+        }
+        .confidence-bar-bg {
+            background-color: #334155; /* slate-700 */
+        }
+        .confidence-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-200 min-h-screen antialiased">
+    <div class="aurora-bg"></div>
+    <div class="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
+        <!-- Navigation Bar -->
+        <nav class="flex justify-between items-center py-6 mb-16">
+            <div class="flex items-center gap-5 cursor-pointer" onclick="window.location.reload()">
+                <img src="images/logo.png" alt="VeriFact Logo" class="w-12 h-12 md:w-16 md:h-16">
+                <span class="text-4xl md:text-4xl font-bold text-white">VeriFact</span>
+            </div>
+            <div class="flex items-center gap-10 text-base font-medium">
+                <a href="#analyzer" class="nav-link text-slate-300 hover:text-white transition-colors">Analyzer</a>
+                <a href="#how-it-works" class="nav-link text-slate-300 hover:text-white transition-colors">How It Works</a>
+                <a href="#contact" class="nav-link text-slate-300 hover:text-white transition-colors">Contact</a>
+            </div>
+        </nav>
+
+        <header class="text-center mb-24 header-anim">
+            <h1 class="text-6xl md:text-6xl font-extrabold animated-gradient-text leading-tight">Navigate the News with Confidence</h1>
+            <p class="text-slate-400 text-xl mt-6 max-w-4xl mx-auto">In a world of information overload, VeriFact is your guide to the truth. Our AI gives you the power to distinguish fact from fiction, instantly.</p>
+        </header>
+
+        <main id="analyzer" class="card-glass p-8 md:p-12 rounded-3xl shadow-2xl space-y-10 mb-24 max-w-4xl mx-auto">
+            <section id="input-section">
+                <h2 class="text-4xl font-bold text-center mb-6 text-slate-100">Analyze a Headline</h2>
+                <!-- Tabs for input -->
+                <div class="flex justify-center mb-4 bg-slate-900/60 p-1 rounded-lg w-max mx-auto">
+                    <button id="tab-text" class="tab-btn active px-6 py-2 text-sm font-semibold rounded-md transition-colors">By Text</button>
+                    <button id="tab-url" class="tab-btn px-6 py-2 text-sm font-semibold text-slate-400 rounded-md transition-colors">By URL</button>
+                </div>
+
+                <div id="input-text-container">
+                    <textarea id="news-headline-input" class="w-full h-32 p-4 bg-slate-900/60 text-slate-200 rounded-lg border-2 border-slate-700 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 transition-all duration-300 shadow-inner placeholder-slate-500 text-lg" placeholder="Paste a news headline here..."></textarea>
+                </div>
+                <div id="input-url-container" class="hidden">
+                    <input type="url" id="news-url-input" class="w-full p-4 bg-slate-900/60 text-slate-200 rounded-lg border-2 border-slate-700 focus:border-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 transition-all duration-300 shadow-inner placeholder-slate-500 text-lg" placeholder="Paste the article URL here...">
+                </div>
+
+                <div class="text-center mt-6">
+                    <button id="analyze-btn" class="btn-primary text-white font-bold py-4 px-14 rounded-lg shadow-lg transform disabled:bg-slate-600 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center justify-center mx-auto text-lg">
+                        <span id="analyze-btn-text">Analyze</span>
+                        <svg id="analyze-spinner" class="spinner h-6 w-6 ml-3 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <section id="result-section" class="hidden">
+                 <div id="result-card" class="result-card bg-slate-800/60 p-6 rounded-lg">
+                    <p class="text-slate-400 text-sm mb-2 italic">Analyzed: "<span id="analyzed-headline"></span>"</p>
+                    <p class="text-3xl font-bold mb-3"><span id="prediction-label"></span></p>
+                    <!-- Confidence Meter -->
+                    <div class="flex items-center gap-4 mb-3">
+                        <span class="text-slate-400 text-lg">Confidence:</span>
+                        <div class="confidence-bar-bg w-full h-4 rounded-full overflow-hidden">
+                            <div id="confidence-bar-fill" class="confidence-bar-fill h-full rounded-full"></div>
+                        </div>
+                        <span id="confidence-score" class="font-mono text-lg font-semibold"></span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-5 pt-5 border-t border-slate-700">
+                        <div id="feedback-section">
+                            <p class="text-base text-slate-400 mb-2">Was this prediction correct?</p>
+                            <button id="correct-btn" class="feedback-btn bg-green-600 hover:bg-green-500 text-white font-semibold py-2 px-4 rounded-md mr-3 text-sm">👍 Correct</button>
+                            <button id="incorrect-btn" class="feedback-btn bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-md text-sm">👎 Incorrect</button>
+                        </div>
+                        <div id="feedback-thanks" class="hidden text-green-400 font-semibold text-lg">
+                            Thank you for your feedback!
+                        </div>
+                        <!-- Share Button -->
+                        <div>
+                            <button id="share-btn" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-md text-sm transition-colors">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" /></svg>
+                                <span id="share-btn-text">Share</span>
+                            </button>
+                        </div>
+                    </div>
+                 </div>
+            </section>
+
+            <section id="history-section" class="pt-8 border-t border-slate-700/50">
+                <div class="flex justify-between items-center mb-5">
+                    <h2 class="text-2xl font-semibold text-slate-300">Analysis History</h2>
+                    <button id="clear-history-btn" class="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-200">Clear</button>
+                </div>
+                <ul id="history-list" class="space-y-3 max-h-56 overflow-y-auto pr-2"></ul>
+                <p id="no-history-msg" class="text-center text-slate-500 mt-4">No history yet. Analyze a headline to begin!</p>
+            </section>
+        </main>
+
+        <section id="how-it-works" class="my-28">
+            <h2 class="text-5xl font-bold text-center mb-16 text-white">How It Works</h2>
+            <div class="grid md:grid-cols-3 gap-10 text-center">
+                <div class="how-it-works-card card-glass p-8 rounded-xl" style="--delay: 1;">
+                    <div class="mb-5 text-cyan-400 bg-slate-800/50 w-20 h-20 rounded-full mx-auto flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-2">1. Input Headline</h3>
+                    <p class="text-slate-400">You provide a news headline from any source.</p>
+                </div>
+                <div class="how-it-works-card card-glass p-8 rounded-xl" style="--delay: 2;">
+                    <div class="mb-5 text-cyan-400 bg-slate-800/50 w-20 h-20 rounded-full mx-auto flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9" /></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-2">2. AI Analysis</h3>
+                    <p class="text-slate-400">Our trained neural network analyzes the text for linguistic patterns.</p>
+                </div>
+                <div class="how-it-works-card card-glass p-8 rounded-xl" style="--delay: 3;">
+                    <div class="mb-5 text-cyan-400 bg-slate-800/50 w-20 h-20 rounded-full mx-auto flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-2">3. Get a Verdict</h3>
+                    <p class="text-slate-400">Receive an instant "Real" or "Fake" classification with a confidence score.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer id="contact" class="text-center py-10 border-t border-slate-800">
+            <p class="text-slate-400">&copy; 2025 VeriFact. All Rights Reserved.</p>
+            <div class="flex justify-center gap-6 mt-4">
+                <a href="#" class="text-slate-500 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.71v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
+                <a href="#" class="text-slate-500 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd" /></svg></a>
+                <a href="#" class="text-slate-500 hover:text-white transition-colors"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 016.343 2.525c.636-.247 1.363-.416 2.427.465C9.793 2.013 10.148 2 12.573 2h.001zm-.001 1.442h-.001c-3.037 0-3.35 0-4.545.06-1.14.053-1.854.22-2.503.472a3.47 3.47 0 00-1.258.85 3.47 3.47 0 00-.85 1.258c-.252.649-.419 1.363-.472 2.503C3.442 9.213 3.442 9.53 3.442 12.315s0 3.102.06 4.245c.053 1.14.22 1.854.472 2.503a3.47 3.47 0 00.85 1.258 3.47 3.47 0 001.258.85c.649.252 1.363.419 2.503.472 1.195.06 1.508.06 4.545.06s3.35 0 4.545-.06c1.14-.053 1.854-.22 2.503-.472a3.47 3.47 0 001.258-.85 3.47 3.47 0 00.85-1.258c.252-.649.419-1.363.472-2.503.06-1.143.06-1.462.06-4.245s0-3.102-.06-4.245c-.053-1.14-.22-1.854-.472-2.503a3.47 3.47 0 00-.85-1.258 3.47 3.47 0 00-1.258-.85c-.649-.252-1.363-.419-2.503-.472C15.665 3.442 15.347 3.442 12.573 3.442h.001z" clip-rule="evenodd" /></svg></a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- UI Elements ---
+        const headlineInput = document.getElementById('news-headline-input');
+        const urlInput = document.getElementById('news-url-input');
+        const analyzeBtn = document.getElementById('analyze-btn');
+        const analyzeBtnText = document.getElementById('analyze-btn-text');
+        const analyzeSpinner = document.getElementById('analyze-spinner');
+        const resultSection = document.getElementById('result-section');
+        const resultCard = document.getElementById('result-card');
+        const predictionLabel = document.getElementById('prediction-label');
+        const confidenceScore = document.getElementById('confidence-score');
+        const confidenceBarFill = document.getElementById('confidence-bar-fill');
+        const feedbackSection = document.getElementById('feedback-section');
+        const correctBtn = document.getElementById('correct-btn');
+        const incorrectBtn = document.getElementById('incorrect-btn');
+        const feedbackThanks = document.getElementById('feedback-thanks');
+        const shareBtn = document.getElementById('share-btn');
+        const shareBtnText = document.getElementById('share-btn-text');
+        const historyList = document.getElementById('history-list');
+        const clearHistoryBtn = document.getElementById('clear-history-btn');
+        const noHistoryMsg = document.getElementById('no-history-msg');
+        const tabText = document.getElementById('tab-text');
+        const tabUrl = document.getElementById('tab-url');
+        const inputTextContainer = document.getElementById('input-text-container');
+        const inputUrlContainer = document.getElementById('input-url-container');
+        const analyzedHeadline = document.getElementById('analyzed-headline');
+
+        // --- State ---
+        let lastPrediction = null;
+        let lastHeadline = '';
+        let history = [];
+        let currentInputMode = 'text'; // 'text' or 'url'
+
+        // --- API Configuration ---
+        const API_BASE_URL = 'http://127.0.0.1:5000';
+
+        // --- History Functions ---
+        function renderHistory() {
+            historyList.innerHTML = '';
+            if (history.length === 0) {
+                noHistoryMsg.classList.remove('hidden');
+                historyList.classList.add('hidden');
+            } else {
+                noHistoryMsg.classList.add('hidden');
+                historyList.classList.remove('hidden');
+                history.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'history-item bg-slate-800/50 p-3 rounded-lg text-sm flex items-center gap-4 cursor-pointer hover:bg-slate-700/50 transition-colors';
+                    li.setAttribute('data-headline', item.headline);
+                    const resultClass = item.prediction === 'real' ? 'bg-green-500' : 'bg-red-500';
+                    li.innerHTML = `
+                        <span class="w-2.5 h-2.5 rounded-full ${resultClass} flex-shrink-0"></span>
+                        <span class="text-slate-300 flex-1 truncate">${item.headline}</span>
+                    `;
+                    li.addEventListener('click', () => {
+                        headlineInput.value = item.headline;
+                        document.getElementById('analyzer').scrollIntoView();
+                    });
+                    historyList.prepend(li);
+                });
+            }
+        }
+
+        function saveHistory() {
+            localStorage.setItem('veriFactAnalysisHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const savedHistory = localStorage.getItem('veriFactAnalysisHistory');
+            if (savedHistory) {
+                history = JSON.parse(savedHistory);
+            }
+            renderHistory();
+        }
+
+        function addToHistory(headline, prediction) {
+            history.unshift({ headline, prediction });
+            if (history.length > 10) history.pop();
+            saveHistory();
+            renderHistory();
+        }
+
+        function clearHistory() {
+            history = [];
+            saveHistory();
+            renderHistory();
+        }
+
+        // --- Main App Logic ---
+        function setLoading(isLoading) {
+            analyzeBtn.disabled = isLoading;
+            analyzeBtnText.textContent = isLoading ? 'Analyzing' : 'Analyze';
+            isLoading ? analyzeSpinner.classList.remove('hidden') : analyzeSpinner.classList.add('hidden');
+        }
+
+        async function handleAnalysis() {
+            let payload = {};
+            let inputHeadline = '';
+
+            if (currentInputMode === 'text') {
+                inputHeadline = headlineInput.value.trim();
+                if (!inputHeadline) {
+                    alert("Please enter a headline.");
+                    return;
+                }
+                payload = { headline: inputHeadline };
+            } else {
+                const url = urlInput.value.trim();
+                if (!url) {
+                    alert("Please enter a URL.");
+                    return;
+                }
+                payload = { url: url };
+            }
+            
+            setLoading(true);
+            resultSection.classList.add('hidden');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || `HTTP error! status: ${response.status}`);
+                }
+                
+                lastHeadline = result.headline; // Use the headline returned from the backend
+                displayResult(result);
+                addToHistory(result.headline, result.prediction);
+
+            } catch (error) {
+                console.error("Error calling prediction API:", error);
+                alert(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function displayResult(result) {
+            resultSection.classList.remove('hidden');
+            feedbackSection.classList.remove('hidden');
+            feedbackThanks.classList.add('hidden');
+            
+            resultCard.classList.remove('result-real', 'result-fake');
+            
+            lastPrediction = result.prediction;
+            analyzedHeadline.textContent = result.headline;
+            const confidence = result.prediction === 'real' ? result.confidence : 1 - result.confidence;
+            const confidencePercent = (confidence * 100).toFixed(2);
+
+            if (result.prediction === 'real') {
+                predictionLabel.textContent = "Likely REAL News";
+                predictionLabel.className = 'text-green-400';
+                resultCard.classList.add('result-real');
+                confidenceBarFill.style.backgroundColor = '#22c55e';
+            } else {
+                predictionLabel.textContent = "Likely FAKE News";
+                predictionLabel.className = 'text-red-400';
+                resultCard.classList.add('result-fake');
+                confidenceBarFill.style.backgroundColor = '#ef4444';
+            }
+            
+            confidenceBarFill.style.width = `${confidencePercent}%`;
+            confidenceScore.textContent = `${confidencePercent}%`;
+            shareBtnText.textContent = 'Share';
+        }
+        
+        async function handleFeedback(feedbackType) {
+            try {
+                await fetch(`${API_BASE_URL}/feedback`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        headline: lastHeadline,
+                        prediction: lastPrediction,
+                        feedback: feedbackType
+                    }),
+                });
+                feedbackSection.classList.add('hidden');
+                feedbackThanks.classList.remove('hidden');
+            } catch (error) {
+                console.error("Error sending feedback:", error);
+                alert("Could not send feedback to the server.");
+            }
+        }
+
+        function handleShare() {
+            const predictionText = lastPrediction === 'real' ? 'Likely REAL' : 'Likely FAKE';
+            const textToCopy = `VeriFact Analysis:\n"${lastHeadline}"\nResult: ${predictionText} News (${confidenceScore.textContent} confidence)`;
+            
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            shareBtnText.textContent = 'Copied!';
+            setTimeout(() => {
+                shareBtnText.textContent = 'Share';
+            }, 2000);
+        }
+
+        function switchInputMode(mode) {
+            currentInputMode = mode;
+            if (mode === 'text') {
+                inputTextContainer.classList.remove('hidden');
+                inputUrlContainer.classList.add('hidden');
+                tabText.classList.add('active');
+                tabUrl.classList.remove('active', 'text-slate-400');
+                tabUrl.classList.add('text-slate-400');
+            } else {
+                inputTextContainer.classList.add('hidden');
+                inputUrlContainer.classList.remove('hidden');
+                tabText.classList.remove('active');
+                tabUrl.classList.add('active');
+                tabUrl.classList.remove('text-slate-400');
+            }
+        }
+
+        // --- Event Listeners ---
+        analyzeBtn.addEventListener('click', handleAnalysis);
+        correctBtn.addEventListener('click', () => handleFeedback('correct'));
+        incorrectBtn.addEventListener('click', () => handleFeedback('incorrect'));
+        clearHistoryBtn.addEventListener('click', clearHistory);
+        shareBtn.addEventListener('click', handleShare);
+        tabText.addEventListener('click', () => switchInputMode('text'));
+        tabUrl.addEventListener('click', () => switchInputMode('url'));
+
+        headlineInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleAnalysis();
+            }
+        });
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', loadHistory);
+    </script>
+</body>
+</html>

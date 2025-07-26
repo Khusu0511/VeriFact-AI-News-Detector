@@ -1,0 +1,15 @@
+# Virtual Environment
+venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Large data files (we don't upload the raw data)
+data/
+
+# User-generated feedback file
+backend/model/feedback.csv
