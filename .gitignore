@@ -13,3 +13,8 @@ data/
 
 # User-generated feedback file
 backend/model/feedback.csv
+
+# Node.js
+node_modules/
+dist/
+.env
