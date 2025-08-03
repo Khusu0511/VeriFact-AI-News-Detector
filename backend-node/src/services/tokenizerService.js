@@ -14,7 +14,10 @@ class TokenizerService {
       const tokenizerPath = path.join(__dirname, '..', '..', 'model', 'tokenizer.json');
       const data = JSON.parse(fs.readFileSync(tokenizerPath, 'utf8'));
       
-      const config = JSON.parse(data.config.word_counts ? data.config : JSON.stringify(data.config)); // some tfjs versions double escape
+      let config = data.config || {};
+      if (typeof config === 'string') {
+        try { config = JSON.parse(config); } catch(e) {}
+      }
       
       this.wordIndex = JSON.parse(data.config.word_index || "{}");
       if (Object.keys(this.wordIndex).length === 0 && data.config.word_index) {
@@ -28,11 +31,11 @@ class TokenizerService {
          console.warn("Could not find word_index in tokenizer.json. Tokenization might fail.");
       }
 
-      this.numWords = data.config.num_words || 10000;
-      this.oovToken = data.config.oov_token || '<OOV>';
-      if (data.config.filters) {
+      this.numWords = config.num_words || 10000;
+      this.oovToken = config.oov_token || '<OOV>';
+      if (config.filters) {
         // basic escape
-        const escapedFilters = data.config.filters.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedFilters = config.filters.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         this.filters = new RegExp(`[${escapedFilters}\t\n]`, 'g');
       }
       console.log("Tokenizer loaded successfully.");
