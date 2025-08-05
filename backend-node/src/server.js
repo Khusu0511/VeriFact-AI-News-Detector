@@ -5,6 +5,8 @@ const rateLimit = require('express-rate-limit');
 const config = require('./config');
 const modelService = require('./services/modelService');
 const tokenizerService = require('./services/tokenizerService');
+const predictRoute = require('./routes/predict');
+const feedbackRoute = require('./routes/feedback');
 
 const app = express();
 
@@ -25,7 +27,10 @@ app.use(limiter);
 // Body Parser
 app.use(express.json());
 
-// Routes Placeholder
+// Routes
+app.use('/api/predict', predictRoute);
+app.use('/api/feedback', feedbackRoute);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'VeriFact API is running' });
 });
