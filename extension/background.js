@@ -25,41 +25,45 @@ function showResultBanner(type, message) {
   const errorIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
 
   if (type === 'real') {
-    text = `Likely REAL News (${message} confidence)`;
-    backgroundGradient = 'linear-gradient(45deg, #10B981, #2DD4BF)'; // Green gradient
+    text = `Likely REAL News (${message} credibility)`;
+    backgroundGradient = 'rgba(16, 185, 129, 0.2)'; // Green tint
     iconSvg = realIcon;
   } else if (type === 'fake') {
-    text = `Likely FAKE News (${message} confidence)`;
-    backgroundGradient = 'linear-gradient(45deg, #EF4444, #F87171)'; // Red gradient
+    text = `Likely FAKE News (${message} credibility)`;
+    backgroundGradient = 'rgba(239, 68, 68, 0.2)'; // Red tint
     iconSvg = fakeIcon;
   } else { // This handles error cases
     text = `Error: ${message}`;
-    backgroundGradient = 'linear-gradient(45deg, #F59E0B, #FBBF24)'; // Amber/Orange gradient
+    backgroundGradient = 'rgba(245, 158, 11, 0.2)'; // Amber/Orange tint
     iconSvg = errorIcon;
   }
 
-  // Apply styles to the banner
+  // Apply styles to the banner (Glassmorphism)
   Object.assign(banner.style, {
     position: 'fixed',
-    top: '0',
-    left: '0',
-    width: '100%',
+    top: '20px',
+    left: '50%',
+    transform: 'translate(-50%, -150%)', // Start off-screen for animation
+    width: 'auto',
+    minWidth: '320px',
     background: backgroundGradient,
+    backdropFilter: 'blur(12px)',
+    WebkitBackdropFilter: 'blur(12px)',
     color: 'white',
-    padding: '14px',
+    padding: '16px 24px',
+    borderRadius: '16px',
     zIndex: '999999',
     fontSize: '16px',
     fontWeight: '600',
-    fontFamily: 'sans-serif',
+    fontFamily: 'Inter, system-ui, sans-serif',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: '12px',
-    borderBottom: '1px solid rgba(0,0,0,0.2)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
-    textShadow: '1px 1px 2px rgba(0,0,0,0.3)',
-    transform: 'translateY(-100%)', // Start off-screen for animation
-    animation: 'slideDown 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards'
+    border: '1px solid rgba(255,255,255,0.2)',
+    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+    textShadow: '0px 1px 2px rgba(0,0,0,0.5)',
+    animation: 'slideDownGlass 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards'
   });
   
   // Set the inner HTML to include the icon and text
@@ -100,9 +104,9 @@ function showResultBanner(type, message) {
   const styleSheet = document.createElement("style");
   styleSheet.type = "text/css";
   styleSheet.innerText = `
-    @keyframes slideDown {
-      from { transform: translateY(-100%); }
-      to { transform: translateY(0); }
+    @keyframes slideDownGlass {
+      from { transform: translate(-50%, -150%); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
     }
   `;
   document.head.appendChild(styleSheet);
@@ -134,6 +138,8 @@ chrome.action.onClicked.addListener(async (tab) => {
 
   try {
     // 1. Get the headline from the page
+    // We no longer strictly need the headline because our backend scrapes the URL,
+    // but we can pass it as fallback text.
     const injectionResults = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       function: getPageHeadline,
@@ -141,12 +147,12 @@ chrome.action.onClicked.addListener(async (tab) => {
 
     const headline = injectionResults[0].result;
 
-    if (headline) {
-      // 2. Call the backend API if a headline was found
-      const response = await fetch('http://127.0.0.1:5000/predict', {
+    if (true) { // Always attempt analysis on URL
+      // Call the new Node.js backend
+      const response = await fetch('http://localhost:3001/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ headline }),
+        body: JSON.stringify({ url: tab.url, text: headline }), // Backend will scrape the URL
       });
 
       if (!response.ok) {
@@ -154,13 +160,15 @@ chrome.action.onClicked.addListener(async (tab) => {
       }
 
       const result = await response.json();
-      const confidencePercent = (result.prediction === 'real' ? result.confidence : 1 - result.confidence) * 100;
+      const credibilityStr = result.credibilityScore ? `${result.credibilityScore}%` : 'N/A';
+      
+      const predictionType = result.prediction === 'Fake News' ? 'fake' : 'real';
 
       // 3. Inject the banner with the prediction result
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         function: showResultBanner,
-        args: [result.prediction, `${confidencePercent.toFixed(1)}%`],
+        args: [predictionType, credibilityStr],
       });
 
     } else {
