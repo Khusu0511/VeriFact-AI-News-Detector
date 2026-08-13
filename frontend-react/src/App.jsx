@@ -56,9 +56,9 @@ function App() {
           </div>
 
           <HowItWorks />
-          <Footer />
         </div>
 
+        <Footer />
         <ScrollToTop />
       </div>
     </ToastProvider>
