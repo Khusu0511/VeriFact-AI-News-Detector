@@ -1,7 +1,3 @@
-# Virtual Environment
-venv/
-.venv
-
 # Node.js
 node_modules/
 dist/
@@ -14,16 +10,11 @@ yarn-error.log*
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-# Python cache
-__pycache__/
-*.pyc
-
-# Large data files (we don't upload the raw data)
+# Large data files
 data/
 
-# User-generated feedback files
+# User-generated feedback
 backend/model/feedback.csv
-backend-node/model/feedback.csv
 
 # IDE
 .vscode/

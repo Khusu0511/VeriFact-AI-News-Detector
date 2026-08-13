@@ -8,10 +8,10 @@ const Footer = () => {
       <div className="w-full px-4 sm:px-6 lg:px-12 xl:px-16 mx-auto">
 
         {/* Main Footer Content */}
-        <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
+        <div className="py-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8">
 
           {/* Brand & Description (Spans 2 columns) */}
-          <div className="lg:col-span-5 flex flex-col items-start">
+          <div className="lg:col-span-3 flex flex-col items-start">
             <a href="#" className="flex items-center gap-3 md:gap-4 mb-6 group" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
               <img
                 src="/logo.png"
@@ -24,7 +24,7 @@ const Footer = () => {
               </span>
             </a>
 
-            <p className="text-slate-400 text-sm leading-relaxed max-w-lg mb-8 mr-4">
+            <p className="text-slate-400 text-sm leading-relaxed max-w-lg mb-8 mr-20">
               A personal project designed to explore how AI can combat misinformation. VeriFact leverages natural language processing and machine learning to help users detect bias, analyze sentiment, and verify news sources in real-time.
             </p>
 
@@ -44,7 +44,7 @@ const Footer = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-2 lg:col-start-7">
+          <div className="lg:col-span-1 lg:col-start-4">
             <h4 className="text-sm font-semibold text-white mb-6">Platform</h4>
             <ul className="flex flex-col gap-3">
               {['AI Analyzer', 'How It Works', 'Key Features', 'About Us', 'Pricing'].map(item => (
@@ -57,7 +57,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="lg:col-span-2 lg:col-start-9">
+          <div className="lg:col-span-1">
             <h4 className="text-sm font-semibold text-white mb-6">Legal & Help</h4>
             <ul className="flex flex-col gap-3">
               {['API Documentation', 'Research Papers', 'Privacy Policy', 'Terms of Service', 'Contact Support'].map(item => (
@@ -70,7 +70,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          <div className="lg:col-span-2 lg:col-start-11">
+          <div className="lg:col-span-1">
             <h4 className="text-sm font-semibold text-white mb-6">Contact Us</h4>
             <ul className="flex flex-col gap-3 text-sm text-slate-400">
               <li>

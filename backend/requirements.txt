@@ -1,9 +1,0 @@
-flask
-flask-cors
-tensorflow
-scikit-learn
-pandas
-numpy
-requests
-beautifulsoup4
-selenium
