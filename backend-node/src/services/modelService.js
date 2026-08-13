@@ -25,6 +25,21 @@ class ModelService {
       }
 
       const weightManifest = modelJson.weightsManifest[0];
+      
+      // Fix Keras 3 -> TFJS weight naming mismatch
+      // Keras 3 exports names like 'forward_lstm/lstm_cell/kernel' but
+      // TFJS Bidirectional creates 'bidirectional/forward_{innerLayerName}/kernel'.
+      // With strict:false, unmatched names silently get random initialization!
+      if (weightManifest && weightManifest.weights) {
+        for (const w of weightManifest.weights) {
+          // LSTM weights: forward_lstm/lstm_cell/X -> bidirectional/forward_forward_lstm/X
+          w.name = w.name
+            .replace('forward_lstm/lstm_cell/', 'bidirectional/forward_forward_lstm/')
+            .replace('backward_lstm/lstm_cell/', 'bidirectional/backward_forward_lstm/')
+            .replace('sequential/', '');  // Remove 'sequential/' prefix from dense/embedding
+        }
+      }
+      
       const weightPath = path.join(path.dirname(modelPath), weightManifest.paths[0]);
       
       const weightData = new Uint8Array(fs.readFileSync(weightPath)).buffer;
@@ -33,7 +48,7 @@ class ModelService {
         modelTopology: topology,
         weightSpecs: weightManifest.weights,
         weightData: weightData
-      }));
+      }), { strict: true });  // strict:true to FAIL if names still don't match
       
       console.log('Model loaded successfully.');
     } catch (error) {

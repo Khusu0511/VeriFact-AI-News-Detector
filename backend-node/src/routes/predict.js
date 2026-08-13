@@ -10,11 +10,16 @@ router.post('/', validatePredictInput, async (req, res) => {
   try {
     const { url, text } = req.body;
     let contentToAnalyze = text;
+    let displaySnippet = text;
 
     // Scrape if URL is provided
     if (url) {
       try {
-        contentToAnalyze = await scraperService.scrapeText(url);
+        const scraped = await scraperService.scrapeText(url);
+        // Use headline for prediction (model trained on headlines)
+        contentToAnalyze = scraped.headline;
+        // Use body text for the display snippet
+        displaySnippet = scraped.bodyText || scraped.headline;
       } catch (scrapeError) {
         return res.status(400).json({ error: `Failed to extract content from URL: ${scrapeError.message}` });
       }
@@ -31,16 +36,18 @@ router.post('/', validatePredictInput, async (req, res) => {
     // Predict
     const prediction = await modelService.predict(padded);
     
-    // Calculate credibility (scale of 0-100)
-    // Assuming model returns probability of being real
-    const fakeProb = prediction.isFake ? (1 - prediction.confidence) : prediction.confidence;
-    const credibilityScore = Math.round((prediction.isFake ? prediction.confidence : fakeProb) * 100);
+    // Credibility score: how confident the model is in its prediction (0-100)
+    // confidence > 0.5 means "real", confidence < 0.5 means "fake"
+    const credibilityScore = Math.round(
+      (prediction.isFake ? (1 - prediction.confidence) : prediction.confidence) * 100
+    );
 
     return res.json({
       prediction: prediction.isFake ? 'Fake News' : 'Real News',
       confidence: prediction.confidence,
       credibilityScore: credibilityScore,
-      text_snippet: contentToAnalyze.substring(0, 200) + '...'
+      analyzed_headline: contentToAnalyze,
+      text_snippet: (displaySnippet || contentToAnalyze).substring(0, 200) + ((displaySnippet || contentToAnalyze).length > 200 ? '...' : '')
     });
 
   } catch (error) {

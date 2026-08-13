@@ -9,7 +9,7 @@ router.post('/', validateFeedbackInput, (req, res) => {
   const { news_text, expected_label, original_url } = req.body;
 
   try {
-    const feedbackPath = path.resolve(__dirname, '../../../model/feedback.csv');
+    const feedbackPath = path.resolve(__dirname, '../../model/feedback.csv');
     
     // Simple CSV formatting
     const escapedText = news_text.replace(/"/g, '""');

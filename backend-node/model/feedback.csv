@@ -1,4 +1,11 @@
-headline,label
-localhost:8000,real
-Pigeons want a shift from dry multigrain crusts to organic sourdough croutons.,fake
-"Hundreds of birds are currently staging a sit-in on top of public statues, refusing to swoop at tourists.",fake
+"text","expected_label","url","timestamp"
+"You are logged in Loading... LOGOUT You don’t have any Active Subscription. Subscribe now Subscribed with another email? Logout and Login with that one. Your active subscription(s) Account subscriptio...","Real","https://www.thehindu.com/news/national/parliament-panel-findings-on-justice-yashwant-varma-cash-row/article71335931.ece","2026-08-12T21:15:54.912Z"
+"You are logged in Loading... LOGOUT You don’t have any Active Subscription. Subscribe now Subscribed with another email? Logout and Login with that one. Your active subscription(s) Account subscriptio...","Real","https://www.thehindu.com/news/national/parliament-panel-findings-on-justice-yashwant-varma-cash-row/article71335931.ece","2026-08-12T21:17:56.928Z"
+"Edition IN IN US GCC English English हिन्दी मराठी ಕನ್ನಡ தமிழ் বাংলা മലയാളം తెలుగు ગુજરાતી Weather Sign In TOI Today's ePaper Live News World News US News Iran knew Trump's hotel floor, targeted his ai...","Fake","https://timesofindia.indiatimes.com/world/us/iran-knew-trumps-hotel-floor-targeted-his-aircraft-during-nato-summit-report/articleshow/133179793.cms","2026-08-12T21:18:27.598Z"
+"You are logged in Loading... LOGOUT You don’t have any Active Subscription. Subscribe now Subscribed with another email? Logout and Login with that one. Your active subscription(s) Account subscriptio...","Fake","https://www.thehindu.com/news/national/karnataka/karnataka-cabinet-on-the-eve-of-monsoon-session-the-portfolios-are-finally-allocated/article71336732.ece","2026-08-12T21:18:47.066Z"
+" Pope Francis had endorsed Donald Trump for U.S. President","Fake","","2026-08-12T21:19:49.375Z"
+"Fred Rogers served as a sniper during the Vietnam War and had a large number of confirmed kills.","Fake","","2026-08-12T21:20:42.045Z"
+"Parliament monsoon session LIVE: Govt passes blame for low LS productivity, says ‘Opposition running away from debate’","Fake","","2026-08-13T12:28:18.844Z"
+"Sukhbir Badal Attacked With Kirpan By Nihang Sikh At Gurudwara In Maharashtra","Fake","","2026-08-13T12:36:18.756Z"
+"Sukhbir Badal Attacked With Kirpan By Nihang Sikh At Gurudwara In MaharashtraAkali Dal sources told NDTV that Sukhbir Badal has suffered an injury on his hand, but it is not life threatening. He is be...","Fake","","2026-08-13T12:37:26.430Z"
+"gdgdg","Fake","","2026-08-13T12:55:22.650Z"

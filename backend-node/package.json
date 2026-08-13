@@ -1,17 +1,19 @@
 {
-  "name": "backend-node",
+  "name": "verifact-backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "VeriFact AI News Detector — Node.js backend API with TensorFlow.js model inference and Puppeteer web scraping.",
+  "main": "src/server.js",
   "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["fake-news", "ai", "tensorflow", "nlp"],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "@tensorflow/tfjs-node": "^4.22.0",
+    "@tensorflow/tfjs": "^4.22.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -20,3 +22,4 @@
     "puppeteer": "^25.6.0"
   }
 }
+

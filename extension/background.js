@@ -147,38 +147,28 @@ chrome.action.onClicked.addListener(async (tab) => {
 
     const headline = injectionResults[0].result;
 
-    if (true) { // Always attempt analysis on URL
-      // Call the new Node.js backend
-      const response = await fetch('http://localhost:3001/api/predict', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: tab.url, text: headline }), // Backend will scrape the URL
-      });
+    // Call the Node.js backend with the page URL
+    const response = await fetch('http://localhost:3001/api/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: tab.url, text: headline }),
+    });
 
-      if (!response.ok) {
-        throw new Error('API request failed');
-      }
-
-      const result = await response.json();
-      const credibilityStr = result.credibilityScore ? `${result.credibilityScore}%` : 'N/A';
-      
-      const predictionType = result.prediction === 'Fake News' ? 'fake' : 'real';
-
-      // 3. Inject the banner with the prediction result
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: showResultBanner,
-        args: [predictionType, credibilityStr],
-      });
-
-    } else {
-      // If no headline was found, show an error banner
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: showResultBanner,
-        args: ['error', 'No headline (h1) found on page.'],
-      });
+    if (!response.ok) {
+      throw new Error('API request failed');
     }
+
+    const result = await response.json();
+    const credibilityStr = result.credibilityScore ? `${result.credibilityScore}%` : 'N/A';
+    
+    const predictionType = result.prediction === 'Fake News' ? 'fake' : 'real';
+
+    // Inject the banner with the prediction result
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      function: showResultBanner,
+      args: [predictionType, credibilityStr],
+    });
   } catch (e) {
     console.error("Fake News Detector Error:", e);
     // If the API call fails, show an error banner

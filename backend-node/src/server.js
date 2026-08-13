@@ -7,11 +7,15 @@ const modelService = require('./services/modelService');
 const tokenizerService = require('./services/tokenizerService');
 const predictRoute = require('./routes/predict');
 const feedbackRoute = require('./routes/feedback');
+const scraperService = require('./services/scraperService');
 
 const app = express();
 
-// Security Middleware
-app.use(helmet());
+// Security Middleware — configured for cross-origin API usage
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false, // Not needed for a pure API server
+}));
 app.use(cors({
   origin: config.CORS_ORIGINS,
   methods: ['GET', 'POST'],
@@ -44,6 +48,9 @@ async function startServer() {
     console.log('Initializing Model...');
     await modelService.load();
 
+    console.log('Pre-launching Puppeteer...');
+    await scraperService.init();
+
     app.listen(config.PORT, () => {
       console.log(`Server listening on port ${config.PORT}`);
     });
@@ -52,5 +59,12 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+// Graceful shutdown — close Puppeteer browser
+process.on('SIGINT', async () => {
+  console.log('Shutting down...');
+  await scraperService.close();
+  process.exit(0);
+});
 
 startServer();

@@ -12,23 +12,26 @@ class TokenizerService {
   load() {
     try {
       const tokenizerPath = path.join(__dirname, '..', '..', 'model', 'tokenizer.json');
-      const data = JSON.parse(fs.readFileSync(tokenizerPath, 'utf8'));
+      let data = JSON.parse(fs.readFileSync(tokenizerPath, 'utf8'));
       
-      let config = data.config || {};
-      if (typeof config === 'string') {
-        try { config = JSON.parse(config); } catch(e) {}
+      // Keras tokenizer.json is often double-encoded (JSON string inside JSON)
+      if (typeof data === 'string') {
+        data = JSON.parse(data);
       }
       
-      this.wordIndex = JSON.parse(data.config.word_index || "{}");
-      if (Object.keys(this.wordIndex).length === 0 && data.config.word_index) {
-          // Sometimes it's a string inside a string
-          try {
-             this.wordIndex = JSON.parse(data.config.word_index);
-          } catch(e) {}
+      const config = data.config || data;
+      
+      // word_index may be a JSON string or an object
+      if (typeof config.word_index === 'string') {
+        this.wordIndex = JSON.parse(config.word_index);
+      } else if (typeof config.word_index === 'object' && config.word_index !== null) {
+        this.wordIndex = config.word_index;
       }
-      // If still empty, it might be in a different place depending on keras version
+
       if (Object.keys(this.wordIndex).length === 0) {
-         console.warn("Could not find word_index in tokenizer.json. Tokenization might fail.");
+        console.warn("Could not find word_index in tokenizer.json. Tokenization might fail.");
+      } else {
+        console.log(`Tokenizer loaded successfully. Vocabulary size: ${Object.keys(this.wordIndex).length}`);
       }
 
       this.numWords = config.num_words || 10000;
@@ -38,7 +41,6 @@ class TokenizerService {
         const escapedFilters = config.filters.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         this.filters = new RegExp(`[${escapedFilters}\t\n]`, 'g');
       }
-      console.log("Tokenizer loaded successfully.");
     } catch (error) {
       console.error("Failed to load tokenizer.json:", error.message);
     }
@@ -54,8 +56,8 @@ class TokenizerService {
     return texts.map(text => {
       // 1. Lowercase
       let processedText = text.toLowerCase();
-      // 2. Filter characters
-      processedText = processedText.replace(this.filters, '');
+      // 2. Replace filter characters with spaces (matches Keras behavior)
+      processedText = processedText.replace(this.filters, ' ');
       // 3. Split by space
       const words = processedText.split(/\s+/).filter(w => w.length > 0);
       
