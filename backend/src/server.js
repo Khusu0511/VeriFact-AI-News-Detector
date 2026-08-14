@@ -39,9 +39,19 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'VeriFact API is running' });
 });
 
+const mongoose = require('mongoose');
+
 // Initialize Services and Start Server
 async function startServer() {
   try {
+    if (process.env.MONGODB_URI) {
+      console.log('Connecting to MongoDB...');
+      await mongoose.connect(process.env.MONGODB_URI);
+      console.log('MongoDB connected successfully.');
+    } else {
+      console.log('MONGODB_URI not set. Feedback will be saved to local CSV.');
+    }
+
     console.log('Initializing Tokenizer...');
     tokenizerService.load();
 
