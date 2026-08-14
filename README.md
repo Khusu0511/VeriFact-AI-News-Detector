@@ -6,7 +6,11 @@
 
 ### Navigate the News with Confidence
 
-A production-ready, full-stack web application that leverages a **Bidirectional LSTM (BiLSTM)** deep learning model to detect fake news headlines in real-time. Built with React, Node.js, and TensorFlow.js.
+**VeriFact** is a production-ready, full-stack web application designed to combat the spread of misinformation online. By leveraging a custom-trained **Bidirectional LSTM (BiLSTM)** deep learning model, VeriFact detects fake news headlines in real-time with high accuracy. 
+
+Whether you're browsing social media or reading articles, VeriFact makes fact-checking effortless through instant text analysis, automated URL scraping, and a seamless **Chrome Extension**. Built with React, Node.js, and TensorFlow.js, it offers a beautifully animated UI while continuously learning from community feedback stored in MongoDB Atlas.
+
+🌐 **Live Demo:** [https://verifact-ai-news-detector.onrender.com/](https://verifact-ai-news-detector.onrender.com/)
 
 [![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react&logoColor=white&style=for-the-badge)](https://react.dev)
 [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?logo=node.js&logoColor=white&style=for-the-badge)](https://nodejs.org)
@@ -46,6 +50,7 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 |---------|-------------|
 | 📝 **Headline Analysis** | Paste any news headline and receive an instant Real/Fake classification |
 | 🔗 **URL Scraping** | Provide an article URL — the app auto-extracts and analyzes the headline |
+| 🧩 **Chrome Extension** | Analyze headlines directly on any webpage with a single click |
 | 📊 **Confidence Scoring** | Animated circular gauge + progress bar visualizing prediction confidence |
 | 💬 **User Feedback** | Report prediction accuracy to safely store labeled data in MongoDB Atlas |
 | 📜 **Analysis History** | Timestamped, persistent history with one-click re-analysis |
@@ -111,43 +116,43 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 ## 🏛️ System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     CLIENT (React)                       │
-│  ┌─────────┐  ┌──────────┐  ┌─────────┐  ┌───────────┐ │
-│  │  Navbar  │  │   Hero   │  │Analyzer │  │  History   │ │
-│  └─────────┘  └──────────┘  └────┬────┘  └───────────┘ │
-│                                  │                       │
-│              HTTP POST /api/predict                       │
-└──────────────────────────────────┼───────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                        CLIENT (React)                        │
+│  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌───────────────┐  │
+│  │  Navbar │  │   Hero   │  │ Analyzer │  │    History    │  │
+│  └─────────┘  └──────────┘  └────┬─────┘  └───────────────┘  │
+│                                  │                           │
+│                        HTTP POST /api/predict                │
+└──────────────────────────────────┼───────────────────────────┘
                                    │
                                    ▼
-┌─────────────────────────────────────────────────────────┐
-│                  SERVER (Node.js + Express)               │
-│                                                           │
-│  ┌──────────┐    ┌───────────────┐    ┌───────────────┐  │
-│  │ Validator │───▶│ Predict Route │───▶│ Model Service │  │
-│  │Middleware │    └───────┬───────┘    │  (TF.js)      │  │
-│  └──────────┘            │            └───────────────┘  │
-│                          │                                │
-│                ┌─────────▼─────────┐      ┌───────────────┐│
-│                │ Tokenizer Service │      │ MongoDB Atlas ││
-│                │ (Text → Sequence) │◀────▶│ (Feedback DB) ││
-│                └───────────────────┘      └───────────────┘│
-│                          │                                │
-│                ┌─────────▼─────────┐                      │
-│                │ Scraper Service   │  (URL mode only)     │
-│                │ (Puppeteer)       │                      │
-│                └───────────────────┘                      │
-└─────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                  SERVER (Node.js + Express)                  │
+│                                                              │
+│  ┌────────────┐    ┌───────────────┐    ┌─────────────────┐  │
+│  │ Validator  │───▶│ Predict Route │───▶│  Model Service │  │
+│  │ Middleware │    └───────┬───────┘    │     (TF.js)     │  │
+│  └────────────┘            │            └─────────────────┘  │
+│                            │                                 │
+│                  ┌─────────▼─────────┐    ┌───────────────┐  │
+│                  │ Tokenizer Service │    │ MongoDB Atlas │  │
+│                  │ (Text → Sequence) │◀──▶│ (Feedback DB)│  │
+│                  └─────────┬─────────┘    └───────────────┘  │
+│                            │                                 │
+│                  ┌─────────▼─────────┐                       │
+│                  │  Scraper Service  │    (URL mode only)    │
+│                  │    (Puppeteer)    │                       │
+│                  └───────────────────┘                       │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ### Request Flow
 
-1. **User Input** → User enters a headline (text) or a URL
-2. **API Request** → Frontend sends `POST /api/predict` with the payload
+1. **User Input** → User enters a headline/URL in the web app, or clicks the extension on a webpage
+2. **API Request** → Client sends `POST /api/predict` with the payload
 3. **URL Scraping** *(if URL mode)* → Puppeteer extracts the `<h1>` / `<title>` from the page
 4. **Tokenization** → Text is lowercased, split into words, mapped to integer indices via `tokenizer.json`
-5. **Padding** → Sequence is padded/truncated to 54 tokens (matching training config)
+5. **Padding** → Sequence is padded/truncated to 100 tokens (matching training config)
 6. **Inference** → TensorFlow.js BiLSTM model predicts a probability (0 = Fake, 1 = Real)
 7. **Response** → Server returns prediction label, confidence score, and analyzed text
 
@@ -158,23 +163,23 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 ### Architecture
 
 ```
-Input (54 tokens)
+Input (100 tokens)
     │
     ▼
 ┌──────────────────────┐
-│   Embedding Layer    │  vocab_size=31,803  →  128-dim vectors
-│   (31,803 × 128)     │
+│   Embedding Layer    │  vocab_size=10,000  →  16-dim vectors
+│   (10,000 × 16)      │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────┐
+│  SpatialDropout1D    │  rate=0.2 (regularization, training only)
 └──────────┬───────────┘
            │
            ▼
 ┌──────────────────────┐
 │  Bidirectional LSTM  │  64 units × 2 directions = 128 output dims
 │  (forward + backward)│
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│   Dense Layer (64)   │  ReLU activation
 └──────────┬───────────┘
            │
            ▼
@@ -189,10 +194,12 @@ Input (54 tokens)
 |-----------|-------|
 | **Framework** | TensorFlow / Keras (Python) |
 | **Architecture** | Bidirectional LSTM |
-| **Embedding Dimension** | 128 |
+| **Embedding Dimension** | 16 |
+| **Regularization** | SpatialDropout1D (0.2) + in-layer LSTM dropout (0.2 / 0.2) |
 | **LSTM Units** | 64 (×2 for bidirectional) |
-| **Vocabulary Size** | 31,803 unique words |
-| **Max Sequence Length** | 54 tokens |
+| **Vocabulary Learned** | 31,803 unique words (full fitted tokenizer vocabulary) |
+| **Vocabulary Used at Inference** | Top 10,000 most frequent words (`num_words` cap) — anything less frequent, or unseen, maps to `<OOV>` |
+| **Max Sequence Length** | 100 tokens |
 | **Optimizer** | Adam |
 | **Loss Function** | Binary Cross-Entropy |
 | **Training Accuracy** | ~96% |
@@ -213,7 +220,7 @@ Input (54 tokens)
     ▼  (map to indices via tokenizer.json)
 [1542, 3891, 2847, 1203, 5, 4521]
     │
-    ▼  (pad/truncate to length 54)
+    ▼  (pad/truncate to length 100)
 [1542, 3891, 2847, 1203, 5, 4521, 0, 0, ..., 0]
     │
     ▼  (feed to BiLSTM model)
@@ -228,6 +235,11 @@ Prediction: 0.87 → "Real News" (87% confidence)
 
 ```
 VeriFact-AI-News-Detector/
+│
+├── extension/                          # Chrome Browser Extension
+│   ├── background.js                   # Service worker for API calls & DOM injection
+│   ├── manifest.json                   # Extension configuration (Manifest V3)
+│   └── icons/                          # Extension icons
 │
 ├── backend/                            # Node.js + Express API Server
 │   ├── model/
@@ -332,6 +344,13 @@ npm run dev
 
 > ✅ App opens at **http://localhost:3002**
 
+#### Install Chrome Extension (Optional)
+
+1. Open Chrome and navigate to `chrome://extensions/`
+2. Enable **Developer mode** in the top right corner
+3. Click **Load unpacked** and select the `extension` folder in this repository
+4. Pin the extension to your toolbar. Click it on any news page to instantly analyze the headline!
+
 ### Verify Everything Works
 
 1. Open **http://localhost:3002** in your browser
@@ -345,10 +364,15 @@ npm run dev
 ### Backend (`backend/.env`)
 
 ```env
-PORT=3001                                # API server port
-MODEL_PATH=./model/tfjs_model/model.json
-MONGODB_URI=mongodb+srv://...            # MongoDB connection string (Optional)
-PUPPETEER_CACHE_DIR=/opt/render/...      # For Render deployment URL scraping
+PORT=3001                                                                  # API server port
+CORS_ORIGINS=https://your-frontend-app.onrender.com,chrome-extension://your-extension-id
+                                                                            # Comma-separated allowed origins (Optional — defaults to localhost + any chrome-extension:// origin)
+
+# Set by Render's Puppeteer buildpack — do NOT set manually
+# PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
+# MongoDB connection string (Optional — leave unset to fall back to local CSV storage)
+# MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority
 ```
 
 ### Frontend
@@ -389,17 +413,19 @@ curl -X POST http://localhost:3001/api/predict \
 {
   "prediction": "Real News",
   "confidence": 0.8134,
-  "credibilityScore": 81.34,
+  "credibilityScore": 81,
   "analyzed_headline": "Scientists discover breakthrough cure for cancer",
   "text_snippet": "Scientists discover breakthrough cure for cancer"
 }
 ```
 
+> `confidence` is the model's raw sigmoid output (0–1, unrounded). `credibilityScore` is `confidence` reframed as "how sure the model is in whichever verdict it returned," rounded to a whole number — e.g. a raw output of `0.13` (a Fake verdict) is shown as `87`, not `13`.
+
 #### Error Response `400 Bad Request`
 
 ```json
 {
-  "error": "Please provide either 'text' or 'url' in the request body"
+  "error": "Please provide either a url or text to analyze."
 }
 ```
 
@@ -425,7 +451,7 @@ curl -X POST http://localhost:3001/api/feedback \
 
 ```json
 {
-  "message": "Feedback recorded successfully"
+  "message": "Feedback recorded successfully!"
 }
 ```
 
@@ -454,6 +480,14 @@ curl -X POST http://localhost:3001/api/feedback \
 | **MongoDB / Mongoose**| Persistent cloud feedback storage |
 | **Helmet** | HTTP security headers |
 | **CORS** | Cross-origin request handling |
+
+### Browser Extension
+
+| Technology | Purpose |
+|-----------|---------|
+| **Manifest V3** | Chrome extension architecture |
+| **Service Workers** | Background API communication |
+| **Content Scripts** | DOM manipulation and UI injection |
 
 ### Machine Learning
 
@@ -492,7 +526,6 @@ Contributions are welcome! Here's how to get started:
 
 - [ ] Add multi-language support
 - [ ] Implement batch analysis mode
-- [ ] Add browser extension
 - [ ] Integrate additional ML models for comparison
 - [ ] Add data visualization dashboard
 
