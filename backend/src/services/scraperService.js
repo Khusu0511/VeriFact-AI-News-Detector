@@ -56,19 +56,17 @@ class ScraperService {
   _findLocalChrome() {
     const fs = require('fs');
     const path = require('path');
+    const { execSync } = require('child_process');
     
-    // 1. Check Render's custom Puppeteer cache directory
-    const renderCachePath = '/opt/render/.cache/puppeteer/chrome';
-    if (fs.existsSync(renderCachePath)) {
+    // 1. Dynamic search on Render (Linux)
+    if (process.platform === 'linux') {
       try {
-        const linuxDirs = fs.readdirSync(renderCachePath);
-        for (const dir of linuxDirs) {
-          if (dir.startsWith('linux-')) {
-            const chromePath = path.join(renderCachePath, dir, 'chrome-linux64', 'chrome');
-            if (fs.existsSync(chromePath)) {
-              return chromePath;
-            }
-          }
+        // Search in the Render cache and project directories for the chrome executable
+        const cmd = 'find /opt/render/.cache/puppeteer /opt/render/project -name chrome -type f -executable 2>/dev/null | head -n 1';
+        const chromePath = execSync(cmd).toString().trim();
+        if (chromePath && fs.existsSync(chromePath)) {
+          console.log(`Dynamically found Chrome at: ${chromePath}`);
+          return chromePath;
         }
       } catch (e) {
         // Fall through
