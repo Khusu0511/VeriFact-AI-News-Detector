@@ -15,7 +15,7 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 [![Vite](https://img.shields.io/badge/Vite-8.2-646CFF?logo=vite&logoColor=white&style=for-the-badge)](https://vite.dev)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
-[Features](#-features) · [Demo](#-quick-demo) · [Getting Started](#-getting-started) · [Architecture](#-system-architecture) · [API Reference](#-api-reference) · [Contributing](#-contributing)
+[Features](#-features) · [Demo](#-quick-demo) · [Screenshots](#-screenshots) · [Getting Started](#-getting-started) · [Architecture](#-system-architecture) · [API Reference](#-api-reference) · [Contributing](#-contributing)
 
 </div>
 
@@ -25,6 +25,7 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 
 - [Features](#-features)
 - [Quick Demo](#-quick-demo)
+- [Screenshots](#-screenshots)
 - [System Architecture](#-system-architecture)
 - [Model Details](#-model-details)
 - [Project Structure](#-project-structure)
@@ -71,6 +72,27 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 3. **Click** "Analyze" and watch the AI process your input
 4. **Review** the Real/Fake verdict with a confidence score
 5. **Provide feedback** to help improve future predictions
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+| | |
+|:---:|:---:|
+| **Landing Page** | **How It Works** |
+| <img src="screenshots/hero.png" width="440"/> | <img src="screenshots/how-it-works.png" width="440"/> |
+| **Analyzer — Input** | **Analyzer — Headline Ready** |
+| <img src="screenshots/analyzer-empty.png" width="440"/> | <img src="screenshots/analyzer-input.png" width="440"/> |
+| **Analysis Result** | **Analysis History** |
+| <img src="screenshots/result-verdict.png" width="440"/> | <img src="screenshots/analysis-history.png" width="440"/> |
+
+<img src="screenshots/footer.png" width="900"/>
+
+</div>
+
+*The result view shows an animated confidence gauge with a color-coded credibility badge (93% confidence in the example above); history entries are timestamped and color-coded green/red by verdict.*
 
 ---
 
@@ -249,6 +271,7 @@ VeriFact-AI-News-Detector/
 │   ├── vite.config.js                  # Vite + Tailwind plugin config
 │   └── package.json
 │
+├── screenshots/                        # README preview images
 ├── Model_Training.ipynb                # Complete model training notebook
 ├── .gitignore
 └── README.md
@@ -458,15 +481,17 @@ Contributions are welcome! Here's how to get started:
 
 ---
 
-## 📄 License
+## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-<div align="center">
-  <br />
-  <p>
-    <a href="#-verifact--ai-powered-fake-news-detector">Back to Top ↑</a>
-  </p>
-</div>
+## 👤 Author
+
+**Kushagra Gupta ( BTech IT 2027 )**
+
+Indian Institute of Information Technology, Allahabad
+
+[GitHub](https://github.com/Khusu0511)
+[LinkedIn](https://www.linkedin.com/in/kushagra-gupta-7b49b5302/)
