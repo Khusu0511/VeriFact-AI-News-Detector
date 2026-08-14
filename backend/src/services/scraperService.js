@@ -51,10 +51,31 @@ class ScraperService {
   }
 
   /**
-   * Try to find a locally installed Chrome/Chromium for local development.
+   * Try to find a locally installed Chrome/Chromium for local development or Render cache.
    */
   _findLocalChrome() {
     const fs = require('fs');
+    const path = require('path');
+    
+    // 1. Check Render's custom Puppeteer cache directory
+    const renderCachePath = '/opt/render/.cache/puppeteer/chrome';
+    if (fs.existsSync(renderCachePath)) {
+      try {
+        const linuxDirs = fs.readdirSync(renderCachePath);
+        for (const dir of linuxDirs) {
+          if (dir.startsWith('linux-')) {
+            const chromePath = path.join(renderCachePath, dir, 'chrome-linux64', 'chrome');
+            if (fs.existsSync(chromePath)) {
+              return chromePath;
+            }
+          }
+        }
+      } catch (e) {
+        // Fall through
+      }
+    }
+
+    // 2. Check standard system paths
     const paths = [
       // Windows
       'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
