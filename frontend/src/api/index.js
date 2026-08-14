@@ -26,16 +26,16 @@ export const analyzeNews = async (input, type) => {
 /**
  * Submit user feedback on a prediction.
  * @param {string} text - The analyzed text
- * @param {boolean} isCorrect - Whether the prediction was correct
+ * @param {string} expectedLabel - 'Real' or 'Fake'
  * @param {string|null} url - Original URL if applicable
  */
-export const submitFeedback = async (text, isCorrect, url) => {
+export const submitFeedback = async (text, expectedLabel, url) => {
   const response = await fetch(`${API_BASE_URL}/feedback`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       news_text: text,
-      expected_label: isCorrect,
+      expected_label: expectedLabel,
       original_url: url,
     }),
   });

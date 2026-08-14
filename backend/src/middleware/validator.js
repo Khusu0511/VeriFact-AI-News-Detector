@@ -24,8 +24,8 @@ const validatePredictInput = (req, res, next) => {
 
 const validateFeedbackInput = (req, res, next) => {
   const { news_text, expected_label } = req.body;
-  if (!news_text || typeof expected_label !== 'boolean') {
-      return res.status(400).json({ error: 'Missing required feedback fields.' });
+  if (!news_text || (expected_label !== 'Real' && expected_label !== 'Fake')) {
+      return res.status(400).json({ error: 'Missing or invalid required feedback fields.' });
   }
   next();
 };

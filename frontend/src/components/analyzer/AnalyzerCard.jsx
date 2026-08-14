@@ -38,9 +38,19 @@ const AnalyzerCard = ({ onResult }) => {
 
   const handleFeedback = async (type) => {
     try {
+      const isCorrect = type === 'correct';
+      let expectedLabel = '';
+      
+      // result.prediction is usually 'Fake News' or 'Real News'
+      if (result.prediction === 'Fake News') {
+        expectedLabel = isCorrect ? 'Fake' : 'Real';
+      } else {
+        expectedLabel = isCorrect ? 'Real' : 'Fake';
+      }
+
       await submitFeedback(
         result.text_snippet,
-        type === 'correct',
+        expectedLabel,
         result.inputType === 'url' ? result.originalInput : null
       );
       setFeedbackSent(true);

@@ -14,7 +14,7 @@ router.post('/', validateFeedbackInput, async (req, res) => {
       const Feedback = require('../models/Feedback');
       const newFeedback = new Feedback({
         text: news_text,
-        expected_label: expected_label ? 'Real' : 'Fake',
+        expected_label: expected_label,
         url: original_url || ''
       });
       await newFeedback.save();
@@ -24,7 +24,7 @@ router.post('/', validateFeedbackInput, async (req, res) => {
       
       // Simple CSV formatting
       const escapedText = news_text.replace(/"/g, '""');
-      const label = expected_label ? 'Real' : 'Fake';
+      const label = expected_label;
       const url = original_url ? original_url.replace(/"/g, '""') : '';
       
       const csvRow = `"${escapedText}","${label}","${url}","${new Date().toISOString()}"\n`;
