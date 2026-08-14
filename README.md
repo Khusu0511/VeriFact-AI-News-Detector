@@ -79,20 +79,32 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 
 <div align="center">
 
-| | |
-|:---:|:---:|
-| **Landing Page** | **How It Works** |
-| <img src="screenshots/hero.png" width="440"/> | <img src="screenshots/how-it-works.png" width="440"/> |
-| **Analyzer — Input** | **Analyzer — Headline Ready** |
-| <img src="screenshots/analyzer-empty.png" width="440"/> | <img src="screenshots/analyzer-input.png" width="440"/> |
-| **Analysis Result** | **Analysis History** |
-| <img src="screenshots/result-verdict.png" width="440"/> | <img src="screenshots/analysis-history.png" width="440"/> |
+### Landing Page
+<img src="screenshots/hero.png" width="850"/>
 
-<img src="screenshots/footer.png" width="900"/>
+### How It Works
+<img src="screenshots/how-it-works.png" width="850"/>
+
+### Analyzer — Input
+<img src="screenshots/analyzer-empty.png" width="850"/>
+
+### Analyzer — Headline Ready
+<img src="screenshots/analyzer-input.png" width="850"/>
+
+### Analysis Result
+<img src="screenshots/result-verdict.png" width="850"/>
+
+*Animated confidence gauge with a color-coded credibility badge — 93% confidence in this example.*
+
+### Analysis History
+<img src="screenshots/analysis-history.png" width="850"/>
+
+*Timestamped entries, color-coded green/red by verdict.*
+
+### Footer
+<img src="screenshots/footer.png" width="850"/>
 
 </div>
-
-*The result view shows an animated confidence gauge with a color-coded credibility badge (93% confidence in the example above); history entries are timestamped and color-coded green/red by verdict.*
 
 ---
 

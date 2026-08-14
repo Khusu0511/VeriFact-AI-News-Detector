@@ -60,11 +60,13 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown — close Puppeteer browser
-process.on('SIGINT', async () => {
-  console.log('Shutting down...');
+// Graceful shutdown — close Puppeteer browser (SIGINT for local, SIGTERM for Render/Docker)
+const shutdown = async (signal) => {
+  console.log(`${signal} received. Shutting down...`);
   await scraperService.close();
   process.exit(0);
-});
+};
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => shutdown('SIGTERM'));
 
 startServer();

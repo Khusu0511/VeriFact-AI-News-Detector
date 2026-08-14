@@ -10,24 +10,36 @@ class ScraperService {
    */
   async init() {
     if (!this.browser) {
-      console.log('Pre-launching Puppeteer browser...');
-      this.browser = await puppeteer.launch({
-        headless: 'new',
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-extensions',
-          '--disable-background-networking',
-          '--disable-default-apps',
-          '--disable-translate',
-          '--no-first-run',
-          '--no-zygote',
-          '--disable-gpu'
-        ]
-      });
-      console.log('Puppeteer browser ready.');
+      try {
+        console.log('Pre-launching Puppeteer browser...');
+        const launchOptions = {
+          headless: 'new',
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-accelerated-2d-canvas',
+            '--disable-extensions',
+            '--disable-background-networking',
+            '--disable-default-apps',
+            '--disable-translate',
+            '--no-first-run',
+            '--no-zygote',
+            '--disable-gpu',
+            '--single-process'
+          ]
+        };
+        // Render's Puppeteer buildpack sets this env var to the installed Chromium path
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+          launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+        this.browser = await puppeteer.launch(launchOptions);
+        console.log('Puppeteer browser ready.');
+      } catch (error) {
+        console.warn('Puppeteer browser failed to launch:', error.message);
+        console.warn('URL scraping will be unavailable. Text-based analysis will still work.');
+        this.browser = null;
+      }
     }
   }
 
@@ -63,6 +75,10 @@ class ScraperService {
 
     if (!this.browser) {
       await this.init();
+    }
+
+    if (!this.browser) {
+      throw new Error('URL scraping is unavailable on this server. Please paste the headline text directly instead.');
     }
 
     const page = await this.browser.newPage();
