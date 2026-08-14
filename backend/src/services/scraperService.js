@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 
 class ScraperService {
   constructor() {
@@ -7,13 +7,25 @@ class ScraperService {
 
   /**
    * Pre-launch the browser so the first request doesn't pay startup cost.
+   * With puppeteer-core, a Chrome/Chromium executable must be available.
    */
   async init() {
     if (!this.browser) {
+      // puppeteer-core requires an explicit executablePath
+      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH
+        || this._findLocalChrome();
+
+      if (!executablePath) {
+        console.warn('No Chrome/Chromium executable found. URL scraping will be unavailable.');
+        console.warn('Set PUPPETEER_EXECUTABLE_PATH env var to enable URL scraping.');
+        return;
+      }
+
       try {
-        console.log('Pre-launching Puppeteer browser...');
-        const launchOptions = {
+        console.log(`Pre-launching Puppeteer browser from: ${executablePath}`);
+        this.browser = await puppeteer.launch({
           headless: 'new',
+          executablePath,
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -28,12 +40,7 @@ class ScraperService {
             '--disable-gpu',
             '--single-process'
           ]
-        };
-        // Render's Puppeteer buildpack sets this env var to the installed Chromium path
-        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-          launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-        }
-        this.browser = await puppeteer.launch(launchOptions);
+        });
         console.log('Puppeteer browser ready.');
       } catch (error) {
         console.warn('Puppeteer browser failed to launch:', error.message);
@@ -41,6 +48,31 @@ class ScraperService {
         this.browser = null;
       }
     }
+  }
+
+  /**
+   * Try to find a locally installed Chrome/Chromium for local development.
+   */
+  _findLocalChrome() {
+    const fs = require('fs');
+    const paths = [
+      // Windows
+      'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+      process.env.LOCALAPPDATA && `${process.env.LOCALAPPDATA}\\Google\\Chrome\\Application\\chrome.exe`,
+      // macOS
+      '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      // Linux
+      '/usr/bin/google-chrome-stable',
+      '/usr/bin/google-chrome',
+      '/usr/bin/chromium-browser',
+      '/usr/bin/chromium',
+    ].filter(Boolean);
+
+    for (const p of paths) {
+      try { if (fs.existsSync(p)) return p; } catch { /* skip */ }
+    }
+    return null;
   }
 
   async close() {

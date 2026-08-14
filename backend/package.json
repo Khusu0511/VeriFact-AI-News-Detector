@@ -8,7 +8,12 @@
     "dev": "node --watch src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["fake-news", "ai", "tensorflow", "nlp"],
+  "keywords": [
+    "fake-news",
+    "ai",
+    "tensorflow",
+    "nlp"
+  ],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
@@ -19,7 +24,6 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.6.2",
     "helmet": "^8.3.0",
-    "puppeteer": "^25.6.0"
+    "puppeteer-core": "^25.7.0"
   }
 }
-
