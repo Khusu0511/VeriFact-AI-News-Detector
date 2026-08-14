@@ -14,7 +14,7 @@ function showResultBanner(type, message) {
   // Create the banner element
   const banner = document.createElement('div');
   banner.id = 'fake-news-result-banner';
-  
+
   let text = '';
   let backgroundGradient = '';
   let iconSvg = '';
@@ -61,7 +61,7 @@ function showResultBanner(type, message) {
     transform: 'translateY(-100%)', // Start off-screen for animation
     animation: 'slideDown 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards'
   });
-  
+
   // Set the inner HTML to include the icon and text
   banner.innerHTML = `
     ${iconSvg}
@@ -87,10 +87,10 @@ function showResultBanner(type, message) {
 
   // Add functionality to the close button
   closeButton.onclick = (e) => {
-      e.stopPropagation(); // Prevent the click from bubbling up
-      banner.remove();
+    e.stopPropagation(); // Prevent the click from bubbling up
+    banner.remove();
   };
-  
+
   banner.appendChild(closeButton);
 
   // Add the banner to the top of the page's body
@@ -110,7 +110,7 @@ function showResultBanner(type, message) {
   // Make the banner automatically disappear after 10 seconds
   setTimeout(() => {
     if (document.getElementById('fake-news-result-banner')) {
-        banner.remove();
+      banner.remove();
     }
     // Clean up the stylesheet from the head
     styleSheet.remove();
@@ -143,7 +143,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
     if (headline) {
       // 2. Call the backend API if a headline was found
-      const response = await fetch('http://localhost:3001/api/predict', {
+      const response = await fetch('https://verifact-api-oh3k.onrender.com/api/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: headline }),
@@ -176,9 +176,9 @@ chrome.action.onClicked.addListener(async (tab) => {
     console.error("Fake News Detector Error:", e);
     // If the API call fails, show an error banner
     await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: showResultBanner,
-        args: ['error', 'Could not connect to analysis server.'],
-      });
+      target: { tabId: tab.id },
+      function: showResultBanner,
+      args: ['error', 'Could not connect to analysis server.'],
+    });
   }
 });
