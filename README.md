@@ -47,7 +47,7 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 | 📝 **Headline Analysis** | Paste any news headline and receive an instant Real/Fake classification |
 | 🔗 **URL Scraping** | Provide an article URL — the app auto-extracts and analyzes the headline |
 | 📊 **Confidence Scoring** | Animated circular gauge + progress bar visualizing prediction confidence |
-| 💬 **User Feedback** | Report prediction accuracy to generate labeled data for model improvement |
+| 💬 **User Feedback** | Report prediction accuracy to safely store labeled data in MongoDB Atlas |
 | 📜 **Analysis History** | Timestamped, persistent history with one-click re-analysis |
 | 📋 **Share Results** | Copy formatted analysis results to clipboard instantly |
 
@@ -129,10 +129,10 @@ A production-ready, full-stack web application that leverages a **Bidirectional 
 │  │Middleware │    └───────┬───────┘    │  (TF.js)      │  │
 │  └──────────┘            │            └───────────────┘  │
 │                          │                                │
-│                ┌─────────▼─────────┐                      │
-│                │ Tokenizer Service │                      │
-│                │ (Text → Sequence) │                      │
-│                └───────────────────┘                      │
+│                ┌─────────▼─────────┐      ┌───────────────┐│
+│                │ Tokenizer Service │      │ MongoDB Atlas ││
+│                │ (Text → Sequence) │◀────▶│ (Feedback DB) ││
+│                └───────────────────┘      └───────────────┘│
 │                          │                                │
 │                ┌─────────▼─────────┐                      │
 │                │ Scraper Service   │  (URL mode only)     │
@@ -235,8 +235,10 @@ VeriFact-AI-News-Detector/
 │   │   │   ├── model.json              # Model topology & weight manifest
 │   │   │   └── group1-shard1of1.bin    # Binary model weights (~1.2 MB)
 │   │   ├── tokenizer.json              # Word → index vocabulary (31,803 entries)
-│   │   └── feedback.csv               # Collected user feedback log
+│   │   └── feedback.csv                # Local fallback feedback log
 │   ├── src/
+│   │   ├── models/
+│   │   │   └── Feedback.js             # Mongoose schema for cloud DB
 │   │   ├── server.js                   # Express app + CORS + pre-initialization
 │   │   ├── config.js                   # Port, model path, environment config
 │   │   ├── middleware/
@@ -343,8 +345,10 @@ npm run dev
 ### Backend (`backend/.env`)
 
 ```env
-PORT=3001                    # API server port
+PORT=3001                                # API server port
 MODEL_PATH=./model/tfjs_model/model.json
+MONGODB_URI=mongodb+srv://...            # MongoDB connection string (Optional)
+PUPPETEER_CACHE_DIR=/opt/render/...      # For Render deployment URL scraping
 ```
 
 ### Frontend
@@ -412,7 +416,7 @@ curl -X POST http://localhost:3001/api/feedback \
   -H "Content-Type: application/json" \
   -d '{
     "news_text": "Scientists discover breakthrough cure for cancer",
-    "expected_label": true,
+    "expected_label": "Real",
     "original_url": null
   }'
 ```
@@ -447,6 +451,7 @@ curl -X POST http://localhost:3001/api/feedback \
 | **Express** | HTTP server framework |
 | **TensorFlow.js** | Neural network inference |
 | **Puppeteer** | Headless Chrome for URL scraping |
+| **MongoDB / Mongoose**| Persistent cloud feedback storage |
 | **Helmet** | HTTP security headers |
 | **CORS** | Cross-origin request handling |
 
