@@ -10,7 +10,7 @@
   "host_permissions": [
     "http://127.0.0.1:3001/*",
     "http://localhost:3001/*",
-    "https://verifact-api-oh3k.onrender.com*"
+    "https://verifact-api-oh3k.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"
